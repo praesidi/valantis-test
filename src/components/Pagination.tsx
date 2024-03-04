@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	PaginationContent,
 	PaginationItem,
@@ -13,26 +13,74 @@ import {
 export default function Pagination({
 	maxPages,
 	currentPage,
+	setCurrentPage,
 }: {
 	maxPages: number;
 	currentPage: number;
+	setCurrentPage: (arg0: number) => void;
 }) {
-	const [activePage, setActivePage] = useState(1);
+	const [buttonsArray, setButtonsArray] = useState<(number | 'dots')[]>([]);
+	const btnsQnty = 7;
 
-	const pagesArr = [];
+	useEffect(() => {
+		if (maxPages <= btnsQnty) {
+			const array = [];
 
-	for (let i = 1; i <= maxPages; i++) {
-		pagesArr.push(i);
-	}
+			for (let i = 0; i < maxPages; i++) {
+				array.push(i + 1);
+			}
+
+			setButtonsArray(array);
+		} else {
+			const buttonsArray = Array(btnsQnty - 2); // from second to penultimate
+			const dynamicBtnsQnty = btnsQnty - 2; // number of buttons exl first and last btns
+
+			if (
+				currentPage >= dynamicBtnsQnty &&
+				currentPage <= maxPages - dynamicBtnsQnty
+			) {
+				const min = currentPage - 1;
+				// buttons when dots shown on both sides
+				for (let i = 0; i < dynamicBtnsQnty; i++) {
+					if (i === 0 || i === buttonsArray.length - 1) {
+						buttonsArray[i] = 'dots';
+					} else {
+						buttonsArray[i] = min + i - 1;
+					}
+				}
+			} else if (currentPage >= dynamicBtnsQnty) {
+				// buttons when dots shown on the left side
+				for (let i = 0; i < dynamicBtnsQnty; i++) {
+					if (i === 0) {
+						buttonsArray[i] = 'dots';
+					} else {
+						buttonsArray[i] = maxPages - dynamicBtnsQnty + i;
+					}
+				}
+			} else {
+				// buttons when dots shown on the right side
+				for (let i = 0; i < dynamicBtnsQnty; i++) {
+					if (i === buttonsArray.length - 1) {
+						buttonsArray[i] = 'dots';
+					} else {
+						buttonsArray[i] = i + 2;
+					}
+				}
+			}
+
+			const result = [1, ...buttonsArray, maxPages];
+			setButtonsArray(result);
+		}
+	}, [currentPage, maxPages]);
 
 	function onPrevious() {
-		if (activePage === 1) return;
-		setActivePage(activePage - 1);
+		if (currentPage === 1) return;
+		setCurrentPage(currentPage - 1);
 	}
 
 	function onNext() {
-		if (activePage === maxPages) return;
-		setActivePage(activePage + 1);
+		if (currentPage === maxPages) return;
+		setCurrentPage(currentPage + 1);
 	}
 
 	return (
@@ -42,7 +90,7 @@ export default function Pagination({
 					<PaginationItem>
 						<PaginationPrevious
 							className={
-								activePage === 1 ? 'pointer-events-none opacity-50' : undefined
+								currentPage === 1 ? 'pointer-events-none opacity-50' : undefined
 							}
 							onClick={() => {
 								onPrevious();
@@ -50,26 +98,30 @@ export default function Pagination({
 							href='#'
 						/>
 					</PaginationItem>
-					{pagesArr.map((page) => {
-						const active = page === activePage ? true : false;
+					{buttonsArray.map((page, index) => {
+						const active = page === currentPage ? true : false;
 						return (
-							<PaginationItem key={page}>
-								<PaginationLink
-									onClick={() => {
-										setActivePage(page);
-									}}
-									href='#'
-									isActive={active}
-								>
-									{page}
-								</PaginationLink>
+							<PaginationItem key={index}>
+								{page === 'dots' ? (
+									<PaginationEllipsis></PaginationEllipsis>
+								) : (
+									<PaginationLink
+										onClick={() => {
+											setCurrentPage(page);
+										}}
+										href='#'
+										isActive={active}
+									>
+										{page}
+									</PaginationLink>
+								)}
 							</PaginationItem>
 						);
 					})}
 					<PaginationItem>
 						<PaginationNext
 							className={
-								activePage === maxPages
+								currentPage === maxPages
 									? 'pointer-events-none opacity-50'
 									: undefined
 							}
