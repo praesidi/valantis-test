@@ -11,19 +11,33 @@ import {
 
 export default function Filters({
 	brandOptions,
-	onSearch,
-	onClear,
+	searchParams,
+	setSearchParams,
 }: {
 	brandOptions: (string | null)[] | null;
-	onSearch: () => void;
-	onClear: () => void;
+	searchParams: URLSearchParams;
+	setSearchParams: (args0: URLSearchParams) => void;
 }) {
+	function clearFilters() {
+		setSearchParams({ brand: '', price: '', product: '' });
+	}
 	return (
 		<div className='my-4'>
 			<form className='flex gap-3 flex-wrap sm:flex-nowrap'>
-				<Select defaultValue='all'>
+				<Select
+					value={searchParams.get('brand') || 'all'}
+					onValueChange={(e) => {
+						searchParams.set('brand', e);
+						setSearchParams(searchParams);
+					}}
+					disabled={
+						searchParams.get('price') || searchParams.get('product')
+							? true
+							: false
+					}
+				>
 					<SelectTrigger>
-						<SelectValue placeholder='Brand' />
+						<SelectValue placeholder='Brands' />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value='all'>All brands</SelectItem>
@@ -40,12 +54,46 @@ export default function Filters({
 						})}
 					</SelectContent>
 				</Select>
-				<Input type='text' placeholder='Product name'></Input>
-				<Input type='number' placeholder='Price'></Input>
-				<Button type='submit' className='min-w-[140px]'>
-					Filter
+				<Input
+					type='text'
+					placeholder='Product name'
+					value={searchParams.get('product') || ''}
+					onChange={(e) => {
+						searchParams.set('product', e.target.value);
+						setSearchParams(searchParams);
+					}}
+					disabled={
+						searchParams.get('price') ||
+						searchParams.get('brand') === 'all' ||
+						searchParams.get('brand')
+							? true
+							: false
+					}
+				></Input>
+				<Input
+					type='number'
+					placeholder='Price'
+					value={searchParams.get('price') || ''}
+					onChange={(e) => {
+						searchParams.set('price', e.target.value);
+						setSearchParams(searchParams);
+					}}
+					disabled={
+						searchParams.get('brand') ||
+						searchParams.get('brand') === 'all' ||
+						searchParams.get('product')
+							? true
+							: false
+					}
+				></Input>
+				<Button
+					className='min-w-[140px]'
+					onClick={() => {
+						clearFilters();
+					}}
+				>
+					Clear
 				</Button>
-				<Button className='min-w-[140px]'>Clear</Button>
 			</form>
 		</div>
 	);
