@@ -37,7 +37,7 @@ export default function Pagination({
 
 			if (
 				currentPage >= dynamicBtnsQnty &&
-				currentPage <= maxPages - dynamicBtnsQnty
+				currentPage <= maxPages - dynamicBtnsQnty + 1
 			) {
 				const min = currentPage - 1;
 				// buttons when dots shown on both sides
