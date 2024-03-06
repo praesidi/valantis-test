@@ -121,7 +121,7 @@ export default function Pagination({
 					<PaginationItem>
 						<PaginationNext
 							className={
-								currentPage === maxPages
+								currentPage === maxPages || maxPages === 0
 									? 'pointer-events-none opacity-50'
 									: undefined
 							}
