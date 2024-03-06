@@ -1,21 +1,11 @@
-import { Button } from '@/components/ui/button';
-
-export default function Error({
-	error,
-	onClick,
-}: {
-	error: string;
-	onClick: () => void;
-}) {
+export default function Error({ error }: { error: string }) {
 	return (
 		<div className='py-3 px-2'>
-			Something went wrong :(
+			<p>Something went wrong :(</p>
 			<br />
 			{error}
 			<br />
-			<Button onClick={onClick} className='mt-5'>
-				Try Again
-			</Button>
+			<p>Try to reload the page</p>
 		</div>
 	);
 }
