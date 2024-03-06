@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,8 +18,12 @@ export default function Filters({
 	setSearchParams: (args0: URLSearchParams) => void;
 }) {
 	function clearFilters() {
-		setSearchParams({ brand: '', price: '', product: '' });
+		searchParams.set('brand', '');
+		searchParams.set('price', '');
+		searchParams.set('product', '');
+		setSearchParams(searchParams);
 	}
+
 	return (
 		<div className='my-4'>
 			<form className='flex gap-3 flex-wrap sm:flex-nowrap'>
@@ -41,17 +44,14 @@ export default function Filters({
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value='all'>All brands</SelectItem>
-						{brandOptions?.map((brand, index) => {
-							return brand ? (
-								<SelectItem key={index} value={brand.toLowerCase()}>
-									{brand}
-								</SelectItem>
-							) : (
-								<SelectItem key={index} value={'brandless'}>
-									{'Without brand'}
-								</SelectItem>
-							);
-						})}
+						{brandOptions?.map(
+							(brand, index) =>
+								brand && (
+									<SelectItem key={index} value={brand}>
+										{brand}
+									</SelectItem>
+								),
+						)}
 					</SelectContent>
 				</Select>
 				<Input
