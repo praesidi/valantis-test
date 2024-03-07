@@ -32,7 +32,7 @@ export default function useFetchProducts(searchParams: URLSearchParams) {
 
 				// get_items method doesn't have offset and limit parameters
 				if (
-					(searchParams.get('brand') && searchParams.get('brand') !== 'all') ||
+					searchParams.get('brand') ||
 					searchParams.get('product') ||
 					searchParams.get('price')
 				) {
@@ -63,7 +63,7 @@ function getOptions(
 	limit: number,
 ) {
 	switch (true) {
-		case !!searchParams.get('brand') && searchParams.get('brand') !== 'all':
+		case !!searchParams.get('brand'):
 			return {
 				'action': 'filter',
 				'params': {

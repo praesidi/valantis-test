@@ -15,10 +15,9 @@ export default function useGetProductsQnty(searchParams: URLSearchParams) {
 				let response = null;
 
 				if (
-					searchParams.get('brand') === 'all' ||
-					(!searchParams.get('brand') &&
-						!searchParams.get('price') &&
-						!searchParams.get('product'))
+					!searchParams.get('brand') &&
+					!searchParams.get('price') &&
+					!searchParams.get('product')
 				) {
 					response = await api.post('', {
 						'action': 'get_ids',
@@ -50,7 +49,7 @@ export default function useGetProductsQnty(searchParams: URLSearchParams) {
 
 function getOptions(searchParams: URLSearchParams) {
 	switch (true) {
-		case !!searchParams.get('brand') && searchParams.get('brand') !== 'all':
+		case !!searchParams.get('brand'):
 			return {
 				'action': 'filter',
 				'params': {

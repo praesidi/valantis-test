@@ -29,7 +29,7 @@ export default function Filters({
 		<div className='my-4'>
 			<form className='flex gap-3 flex-wrap sm:flex-nowrap'>
 				<Select
-					value={searchParams.get('brand') || 'all'}
+					value={searchParams.get('brand') || ''}
 					onValueChange={(e) => {
 						searchParams.set('brand', e);
 						searchParams.set('offset', '0');
@@ -43,7 +43,6 @@ export default function Filters({
 						<SelectValue placeholder='Brands' />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value='all'>All brands</SelectItem>
 						{brandOptions?.map(
 							(brand, index) =>
 								brand && (
@@ -63,11 +62,7 @@ export default function Filters({
 						searchParams.set('offset', '0');
 						setSearchParams(searchParams);
 					}}
-					disabled={
-						(searchParams.get('brand') !== 'all' &&
-							!!searchParams.get('brand')) ||
-						!!searchParams.get('price')
-					}
+					disabled={!!searchParams.get('brand') || !!searchParams.get('price')}
 				></Input>
 				<Input
 					type='number'
@@ -79,9 +74,7 @@ export default function Filters({
 						setSearchParams(searchParams);
 					}}
 					disabled={
-						(searchParams.get('brand') !== 'all' &&
-							!!searchParams.get('brand')) ||
-						!!searchParams.get('product')
+						!!searchParams.get('brand') || !!searchParams.get('product')
 					}
 				></Input>
 				<Button
