@@ -6,16 +6,14 @@ export default function useFetchBrands() {
 	const [data, setData] = useState<(string | null)[] | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
-	// const maxRetries = 3;
-	// const retryDelay = 1000;
+	const maxRetries = 3;
+	const retryDelay = 2000;
 
 	useEffect(() => {
-		// let retries = 0;
+		let retries = 0;
 		setIsLoading(true);
 
 		async function fetchData() {
-			console.log('fetch brands');
-
 			try {
 				const response = await api.post('', {
 					'action': 'get_fields',
@@ -27,18 +25,14 @@ export default function useFetchBrands() {
 				const filtered = [...new Set(data)];
 				setData(filtered);
 			} catch (error) {
-				// if (retries < maxRetries) {
-				// 	retries++;
-				// 	setTimeout(fetchData, retryDelay);
-				// } else {
-				// 	setError(
-				// 		`Something went wrong while getting data about brands: ${error}`,
-				// 	);
-				// }
-
-				setError(
-					`Something went wrong while getting data about brands: ${error}`,
-				);
+				if (retries < maxRetries) {
+					retries++;
+					setTimeout(fetchData, retryDelay);
+				} else {
+					setError(
+						`Something went wrong while getting data about brands: ${error}`,
+					);
+				}
 			}
 			setIsLoading(false);
 		}
