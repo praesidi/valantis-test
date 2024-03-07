@@ -1,30 +1,39 @@
-# React + TypeScript + Vite
+# Valantis Test Assignment
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Чтобы ознакомиться с моим решением <a href='https://valantis-test-tau.vercel.app/'> тык сюда</a>
 
-Currently, two official plugins are available:
+### Описание задания:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Используя предоставленный апи создать страницу, которая отражает список товаров. Для
+каждого товара должен отображаться его id, название, цена и бренд.
+Требования:
 
-## Expanding the ESLint configuration
+- выводить по 50 товаров на страницу с возможностью постраничного перехода
+  (пагинация) в обе стороны
+- возможность фильтровать выдачу используя предоставленное апи по названию, цене
+  и бренду
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Если API возвращает дубли по id, то следует их считать одним товаром и выводить только
+первый, даже если другие поля различаются.
+Если API возвращает ошибку, следует вывести идентификатор ошибки в консоль, если он
+есть и повторить запрос.
 
-- Configure the top-level `parserOptions` property like this:
+### Проблемы, замеченные при работе с API
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+- Нестабильность. Примерно каждый 10 запрос возвращается с ошибкой 500
+- Ограниченный фильтр. API позволяет использовать только 1 фильтр одновременно. При передаче 2 и более возвращает результат только для 1 в списке
+- Если передать методу get_items 50 id, то получим 53 записи с дублями (даже если передали 50 уникальных id). Из-за этого не можем отсеивать дубли на моменте получения и передачи списка id
+- Нет метода для получения информации о кол-ве записей, что усложняет пагинацию
+
+### Краткая информация о проекте
+
+- Тестовое сделано на связке React + Vite + TypeScript
+- Для стилизации использовал Tailwind + shadcn/ui
+- Для работы с API использовал библиотеку Axios
+
+### Инструкция по запуску
+
 ```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+npm i
+npm run build
+```
