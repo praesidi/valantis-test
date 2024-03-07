@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import {
 	PaginationContent,
@@ -12,15 +11,19 @@ import {
 
 export default function Pagination({
 	maxPages,
-	currentPage,
-	setCurrentPage,
+	searchParams,
+	setSearchParams,
 }: {
 	maxPages: number;
-	currentPage: number;
-	setCurrentPage: (arg0: number) => void;
+	searchParams: URLSearchParams;
+	setSearchParams: (args0: URLSearchParams) => void;
 }) {
 	const [buttonsArray, setButtonsArray] = useState<(number | 'dots')[]>([]);
 	const btnsQnty = 7;
+	const currentPage =
+		Number(searchParams.get('offset')) / Number(searchParams.get('limit')) + 1;
+	const currentOffset = Number(searchParams.get('offset'));
+	const currentLimit = Number(searchParams.get('limit'));
 
 	useEffect(() => {
 		if (maxPages <= btnsQnty) {
@@ -71,16 +74,28 @@ export default function Pagination({
 			const result = [1, ...buttonsArray, maxPages];
 			setButtonsArray(result);
 		}
-	}, [currentPage, maxPages]);
+	}, [searchParams, maxPages, currentPage]);
 
 	function onPrevious() {
 		if (currentPage === 1) return;
-		setCurrentPage(currentPage - 1);
+
+		const updatedOffset = String(currentOffset - currentLimit);
+		searchParams.set('offset', updatedOffset);
+		setSearchParams(searchParams);
 	}
 
 	function onNext() {
 		if (currentPage === maxPages) return;
-		setCurrentPage(currentPage + 1);
+
+		const updatedOffset = String(currentOffset + currentLimit);
+		searchParams.set('offset', updatedOffset);
+		setSearchParams(searchParams);
+	}
+
+	function onStep(page: number) {
+		const updatedOffset = String((page - 1) * currentLimit);
+		searchParams.set('offset', updatedOffset);
+		setSearchParams(searchParams);
 	}
 
 	return (
@@ -92,9 +107,7 @@ export default function Pagination({
 							className={
 								currentPage === 1 ? 'pointer-events-none opacity-50' : undefined
 							}
-							onClick={() => {
-								onPrevious();
-							}}
+							onClick={() => onPrevious()}
 							href='#'
 						/>
 					</PaginationItem>
@@ -106,9 +119,7 @@ export default function Pagination({
 									<PaginationEllipsis></PaginationEllipsis>
 								) : (
 									<PaginationLink
-										onClick={() => {
-											setCurrentPage(page);
-										}}
+										onClick={() => onStep(page)}
 										href='#'
 										isActive={active}
 									>
@@ -125,9 +136,7 @@ export default function Pagination({
 									? 'pointer-events-none opacity-50'
 									: undefined
 							}
-							onClick={() => {
-								onNext();
-							}}
+							onClick={() => onNext()}
 							href='#'
 						/>
 					</PaginationItem>

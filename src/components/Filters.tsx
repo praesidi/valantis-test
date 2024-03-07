@@ -21,6 +21,7 @@ export default function Filters({
 		searchParams.set('brand', '');
 		searchParams.set('price', '');
 		searchParams.set('product', '');
+		searchParams.set('offset', '0');
 		setSearchParams(searchParams);
 	}
 
@@ -31,12 +32,11 @@ export default function Filters({
 					value={searchParams.get('brand') || 'all'}
 					onValueChange={(e) => {
 						searchParams.set('brand', e);
+						searchParams.set('offset', '0');
 						setSearchParams(searchParams);
 					}}
 					disabled={
-						searchParams.get('price') || searchParams.get('product')
-							? true
-							: false
+						!!searchParams.get('price') || !!searchParams.get('product')
 					}
 				>
 					<SelectTrigger>
@@ -60,14 +60,13 @@ export default function Filters({
 					value={searchParams.get('product') || ''}
 					onChange={(e) => {
 						searchParams.set('product', e.target.value);
+						searchParams.set('offset', '0');
 						setSearchParams(searchParams);
 					}}
 					disabled={
-						searchParams.get('price') ||
-						searchParams.get('brand') === 'all' ||
-						searchParams.get('brand')
-							? true
-							: false
+						(searchParams.get('brand') !== 'all' &&
+							!!searchParams.get('brand')) ||
+						!!searchParams.get('price')
 					}
 				></Input>
 				<Input
@@ -76,14 +75,13 @@ export default function Filters({
 					value={searchParams.get('price') || ''}
 					onChange={(e) => {
 						searchParams.set('price', e.target.value);
+						searchParams.set('offset', '0');
 						setSearchParams(searchParams);
 					}}
 					disabled={
-						searchParams.get('brand') ||
-						searchParams.get('brand') === 'all' ||
-						searchParams.get('product')
-							? true
-							: false
+						(searchParams.get('brand') !== 'all' &&
+							!!searchParams.get('brand')) ||
+						!!searchParams.get('product')
 					}
 				></Input>
 				<Button

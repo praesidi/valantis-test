@@ -1,87 +1,83 @@
 import api from '@/lib/axiosInstance';
 import { useEffect, useState } from 'react';
-import { Filter } from '@/types';
 
-export default function useGetProductsQnty(filters: Filter) {
+export default function useGetProductsQnty(searchParams: URLSearchParams) {
 	const [data, setData] = useState<number | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	// const maxRetries = 3;
-	// const retryDelay = 2500;
+	const maxRetries = 3;
+	const retryDelay = 2500;
 
 	useEffect(() => {
-		// let retries = 0;
+		let retries = 0;
 
 		async function fetchData() {
-			console.log('getting products qnty');
-
 			try {
 				let response = null;
 
-				if (!filters.brand && !filters.price && !filters.product) {
+				if (
+					searchParams.get('brand') === 'all' ||
+					(!searchParams.get('brand') &&
+						!searchParams.get('price') &&
+						!searchParams.get('product'))
+				) {
 					response = await api.post('', {
 						'action': 'get_ids',
 						'params': {},
 					});
 				} else {
-					response = await api.post('', getOptions(filters));
+					const options = getOptions(searchParams);
+					response = await api.post('', options);
 				}
 
 				const data = await response.data.result;
 				setData(data.length);
 			} catch (error) {
-				// if (retries < maxRetries) {
-				// 	retries++;
-				// 	setTimeout(fetchData, retryDelay);
-				// } else {
-				// 	setError(
-				// 		`Something went wrong while getting products quantity: ${error}`,
-				// 	);
-				// }
-
-				setError(
-					`Something went wrong while getting products quantity: ${error}`,
-				);
+				if (retries < maxRetries) {
+					retries++;
+					setTimeout(fetchData, retryDelay);
+				} else {
+					setError(
+						`Something went wrong while getting products quantity: ${error}`,
+					);
+				}
 			}
 		}
 		fetchData();
-	}, [filters]);
+	}, [searchParams]);
 
 	return { data, error };
 }
 
-function getOptions(filters: Filter, offset = 0, limit = 49) {
+function getOptions(searchParams: URLSearchParams) {
 	switch (true) {
-		case filters.brand !== null:
+		case !!searchParams.get('brand') && searchParams.get('brand') !== 'all':
 			return {
 				'action': 'filter',
 				'params': {
-					brand: filters.brand,
+					brand: searchParams.get('brand') || '',
 				},
 			};
 
-		case filters.price !== null:
+		case !!searchParams.get('price'):
 			return {
 				'action': 'filter',
 				'params': {
-					price: filters.price,
+					price: Number(searchParams.get('price')) || '',
 				},
 			};
 
-		case filters.product !== null:
+		case !!searchParams.get('product'):
 			return {
 				'action': 'filter',
 				'params': {
-					product: filters.product,
+					product: searchParams.get('product') || '',
 				},
 			};
 
 		default:
 			return {
 				'action': 'get_ids',
-				'params': {
-					offset: offset,
-					limit: limit,
-				},
+				'params': {},
 			};
 	}
 }

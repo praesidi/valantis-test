@@ -1,28 +1,25 @@
-import { Filter, Product } from '@/types';
+import { Product } from '@/types';
 import { useEffect, useState } from 'react';
 import api from '@/lib/axiosInstance';
 
-export default function useFetchProducts(
-	filters: Filter,
-	offset: number,
-	limit: number,
-) {
+export default function useFetchProducts(searchParams: URLSearchParams) {
 	const [data, setData] = useState<Product[] | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
-	// const maxRetries = 3;
-	// const retryDelay = 2500;
+	const maxRetries = 3;
+	const retryDelay = 2500;
 
 	useEffect(() => {
-		// let retries = 0;
-		setIsLoading(true);
+		let retries = 0;
+		const offset = Number(searchParams.get('offset'));
+		const limit = Number(searchParams.get('limit'));
 
 		async function fetchData() {
-			console.log('fetch products');
-			console.log(filters);
+			setIsLoading(true);
 
 			try {
-				const response = await api.post('', getOptions(filters, offset, limit));
+				const options = getOptions(searchParams, offset, limit);
+				const response = await api.post('', options);
 				const ids: string[] = await response.data.result;
 
 				const lastResponse = await api.post('', {
@@ -34,52 +31,59 @@ export default function useFetchProducts(
 				let data: Product[] = await lastResponse.data.result;
 
 				// get_items method doesn't have offset and limit parameters
-				if (filters.brand || filters.product || filters.price) {
+				if (
+					(searchParams.get('brand') && searchParams.get('brand') !== 'all') ||
+					searchParams.get('product') ||
+					searchParams.get('price')
+				) {
 					data = data.slice(offset, offset + limit);
 				}
 
 				setData(data);
+				setIsLoading(false);
 			} catch (error) {
-				// if (retries < maxRetries) {
-				// 	retries++;
-				// 	setTimeout(fetchData, retryDelay);
-				// } else {
-				// 	setError(`Something went wrong while fetching data: ${error}`);
-				// }
-
-				setError(`Something went wrong while fetching data: ${error}`);
+				if (retries < maxRetries) {
+					retries++;
+					setTimeout(fetchData, retryDelay);
+				} else {
+					setIsLoading(false);
+					setError(`Something went wrong while fetching data: ${error}`);
+				}
 			}
-			setIsLoading(false);
 		}
 		fetchData();
-	}, [filters, offset]);
+	}, [searchParams]);
 
 	return { data, isLoading, error };
 }
 
-function getOptions(filters: Filter, offset = 0, limit = 50) {
+function getOptions(
+	searchParams: URLSearchParams,
+	offset: number,
+	limit: number,
+) {
 	switch (true) {
-		case filters.brand !== null:
+		case !!searchParams.get('brand') && searchParams.get('brand') !== 'all':
 			return {
 				'action': 'filter',
 				'params': {
-					brand: filters.brand,
+					brand: searchParams.get('brand') || '',
 				},
 			};
 
-		case filters.price !== null:
+		case !!searchParams.get('price'):
 			return {
 				'action': 'filter',
 				'params': {
-					price: filters.price,
+					price: Number(searchParams.get('price')) || '',
 				},
 			};
 
-		case filters.product !== null:
+		case !!searchParams.get('product'):
 			return {
 				'action': 'filter',
 				'params': {
-					product: filters.product,
+					product: searchParams.get('product') || '',
 				},
 			};
 

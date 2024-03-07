@@ -1,6 +1,6 @@
 import { PRODUCTS_PER_PAGE } from '@/variables';
 import { useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import useFetchBrands from '@/hooks/useFetchBrands';
 import useFetchProducts from '@/hooks/useFetchProducts';
 import useGetProductsQnty from '@/hooks/useGetProductsQnty';
@@ -12,20 +12,18 @@ import Filters from './Filters';
 import Error from './Error';
 
 export default function Main() {
-	const [currentPage, setCurrentPage] = useState<number>(1);
-	const [searchParams, setSearchParams] = useSearchParams({
-		brand: '',
-		price: '',
-		product: '',
-	});
+	const [searchParams, setSearchParams] = useSearchParams();
 
-	console.log(searchParams);
+	useEffect(() => {
+		const limit = String(PRODUCTS_PER_PAGE);
 
-	const { data: productsQnty, error: productsQntyError } = useGetProductsQnty({
-		brand: searchParams.get('brand'),
-		product: searchParams.get('product'),
-		price: searchParams.get('price'),
-	});
+		searchParams.set('offset', '0');
+		searchParams.set('limit', limit);
+		setSearchParams(searchParams);
+	}, []);
+
+	const { data: productsQnty, error: productsQntyError } =
+		useGetProductsQnty(searchParams);
 
 	const {
 		data: brands,
@@ -37,26 +35,18 @@ export default function Main() {
 		data: products,
 		isLoading: areProductsLoading,
 		error: productsError,
-	} = useFetchProducts(
-		{
-			brand: searchParams.get('brand'),
-			product: searchParams.get('product'),
-			price: searchParams.get('price'),
-		},
-		(currentPage - 1) * PRODUCTS_PER_PAGE,
-		PRODUCTS_PER_PAGE,
-	);
+	} = useFetchProducts(searchParams);
 
 	if (brandError) {
 		return <Error error={brandError} />;
 	}
 
-	if (productsError) {
-		return <Error error={productsError} />;
-	}
-
 	if (productsQntyError) {
 		return <Error error={productsQntyError} />;
+	}
+
+	if (productsError) {
+		return <Error error={productsError} />;
 	}
 
 	function getPagesQnty() {
@@ -80,8 +70,8 @@ export default function Main() {
 			)}
 			{areProductsLoading ? <ProductsSkeleton /> : <Products data={products} />}
 			<Pagination
-				currentPage={currentPage}
-				setCurrentPage={setCurrentPage}
+				searchParams={searchParams}
+				setSearchParams={setSearchParams}
 				maxPages={getPagesQnty()}
 			/>
 		</main>
